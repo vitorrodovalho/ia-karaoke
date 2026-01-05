@@ -1,0 +1,35 @@
+[project]
+name = "karaoke-ai-backing"
+version = "0.1.0"
+description = "Pipeline para gerar backing tracks instrumentais via análise musical"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+  {name = "Karaoke AI"}
+]
+dependencies = [
+  "typer>=0.12.0",
+  "pydantic>=2.0.0",
+  "rich>=13.0.0",
+  "numpy>=1.24.0",
+  "scipy>=1.10.0",
+  "librosa>=0.10.0",
+  "pretty_midi>=0.2.10",
+]
+
+[project.scripts]
+karaoke-ai = "karaoke.cli:app"
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
