@@ -14,9 +14,18 @@ logger = setup_logger()
 
 
 @app.command()
-def run(song_id: str, root: Path | None = None) -> None:
+def run(
+    song_id: str,
+    root: Path | None = None,
+    mode: str = typer.Option(
+        "source",
+        "--mode",
+        "-m",
+        help="Modo de geração: 'ai' recria instrumentos; 'source' remove voz da música original.",
+    ),
+) -> None:
     """Executa o pipeline para um song_id."""
-    report = run_pipeline(song_id, root=root)
+    report = run_pipeline(song_id, root=root, mode=mode)
     typer.echo(json.dumps(report.model_dump(), indent=2, ensure_ascii=False))
 
 

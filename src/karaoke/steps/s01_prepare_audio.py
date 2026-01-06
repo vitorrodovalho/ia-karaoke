@@ -9,7 +9,7 @@ from karaoke.utils.proc import run_command
 logger = setup_logger()
 
 
-def run(input_dir: Path, output_dir: Path) -> Path:
+def run(input_dir: Path, output_dir: Path, *, channels: int = 1) -> Path:
     output_dir.mkdir(parents=True, exist_ok=True)
     source = input_dir / "audio.mp3"
     target = output_dir / "audio.wav"
@@ -23,7 +23,7 @@ def run(input_dir: Path, output_dir: Path) -> Path:
             "-ar",
             "44100",
             "-ac",
-            "1",
+            str(channels),
             str(target),
         ]
     )
