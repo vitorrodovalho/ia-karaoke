@@ -113,6 +113,27 @@ def _build_bass(
     return midi
 
 
+def _build_strummed_chord(
+    root_note: int,
+    duration: float,
+    start: float,
+    strum_delay: float = 0.03,
+) -> list[pretty_midi.Note]:
+    notes = []
+    for index, interval in enumerate([0, 4, 7]):
+        note_start = start + strum_delay * index
+        note_end = max(note_start + 0.05, start + duration)
+        notes.append(
+            pretty_midi.Note(
+                velocity=75,
+                pitch=root_note + interval,
+                start=note_start,
+                end=note_end,
+            )
+        )
+    return notes
+
+
 def _build_chords(
     bpm: float,
     chords: list[dict[str, float | str]],
@@ -126,13 +147,38 @@ def _build_chords(
         end = float(chords[index + 1]["time"]) if index + 1 < len(chords) else duration
         if end <= start:
             continue
+        if chord.get("instrument") not in ("piano", "keys", "keyboard"):
+            continue
         root = str(chord["chord"]).replace("m", "")
         root_note = chord_root_to_midi(root, octave=4)
         add_notes(instrument, build_chord(root_note, duration=end - start, start=start))
 
-    if not instrument.notes:
-        add_notes(instrument, build_chord(chord_root_to_midi("C"), duration=duration, start=0.0))
-    midi.instruments.append(instrument)
+    if instrument.notes:
+        midi.instruments.append(instrument)
+    return midi
+
+
+def _build_guitar(
+    bpm: float,
+    chords: list[dict[str, float | str]],
+    duration: float,
+) -> pretty_midi.PrettyMIDI:
+    midi = pretty_midi.PrettyMIDI(initial_tempo=bpm)
+    instrument = pretty_midi.Instrument(program=24)
+
+    for index, chord in enumerate(chords):
+        start = float(chord["time"])
+        end = float(chords[index + 1]["time"]) if index + 1 < len(chords) else duration
+        if end <= start:
+            continue
+        if chord.get("instrument") != "guitar":
+            continue
+        root = str(chord["chord"]).replace("m", "")
+        root_note = chord_root_to_midi(root, octave=4)
+        add_notes(instrument, _build_strummed_chord(root_note, duration=end - start, start=start))
+
+    if instrument.notes:
+        midi.instruments.append(instrument)
     return midi
 
 
@@ -159,20 +205,28 @@ def run(
     drums_midi = _build_drums(bpm, beats, duration)
     bass_midi = _build_bass(bpm, bass_pitch, duration)
     chords_midi = _build_chords(bpm, chords, duration)
+    guitar_midi = _build_guitar(bpm, chords, duration)
 
     arrangement = pretty_midi.PrettyMIDI(initial_tempo=bpm)
-    arrangement.instruments = drums_midi.instruments + bass_midi.instruments + chords_midi.instruments
+    arrangement.instruments = (
+        drums_midi.instruments
+        + bass_midi.instruments
+        + chords_midi.instruments
+        + guitar_midi.instruments
+    )
 
     paths = {
         "drums": output_dir / "drums.mid",
         "bass": output_dir / "bass.mid",
         "chords": output_dir / "chords.mid",
+        "guitar": output_dir / "guitar.mid",
         "arrangement": output_dir / "arrangement.mid",
     }
 
     drums_midi.write(str(paths["drums"]))
     bass_midi.write(str(paths["bass"]))
     chords_midi.write(str(paths["chords"]))
+    guitar_midi.write(str(paths["guitar"]))
     arrangement.write(str(paths["arrangement"]))
 
     logger.info("MIDIs gerados em %s", output_dir)
