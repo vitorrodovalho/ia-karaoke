@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Any
 
 
@@ -14,5 +14,6 @@ class AnalysisReport(BaseModel):
 class ExportReport(BaseModel):
     song_id: str
     backing_path: str
-    midi_paths: dict[str, str]
-    analysis: AnalysisReport
+    mode: str
+    midi_paths: dict[str, str] = Field(default_factory=dict)
+    analysis: AnalysisReport | None = None

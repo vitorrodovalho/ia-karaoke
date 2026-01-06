@@ -189,6 +189,7 @@ def run(
     chords: list[dict[str, float | str]],
     bass_pitch: list[dict[str, float | None]],
     output_dir: Path,
+    include_stems: bool = True,
 ) -> dict[str, Path]:
     output_dir.mkdir(parents=True, exist_ok=True)
     duration_candidates: list[float] = []
@@ -215,18 +216,22 @@ def run(
         + guitar_midi.instruments
     )
 
-    paths = {
-        "drums": output_dir / "drums.mid",
-        "bass": output_dir / "bass.mid",
-        "chords": output_dir / "chords.mid",
-        "guitar": output_dir / "guitar.mid",
-        "arrangement": output_dir / "arrangement.mid",
-    }
+    paths = {"arrangement": output_dir / "arrangement.mid"}
+    if include_stems:
+        paths.update(
+            {
+                "drums": output_dir / "drums.mid",
+                "bass": output_dir / "bass.mid",
+                "chords": output_dir / "chords.mid",
+                "guitar": output_dir / "guitar.mid",
+            }
+        )
 
-    drums_midi.write(str(paths["drums"]))
-    bass_midi.write(str(paths["bass"]))
-    chords_midi.write(str(paths["chords"]))
-    guitar_midi.write(str(paths["guitar"]))
+    if include_stems:
+        drums_midi.write(str(paths["drums"]))
+        bass_midi.write(str(paths["bass"]))
+        chords_midi.write(str(paths["chords"]))
+        guitar_midi.write(str(paths["guitar"]))
     arrangement.write(str(paths["arrangement"]))
 
     logger.info("MIDIs gerados em %s", output_dir)
