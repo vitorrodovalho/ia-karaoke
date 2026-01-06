@@ -18,7 +18,7 @@ def run(
     bpm: float,
     beats: list[float],
     chords: list[dict[str, float | str]],
-    bass_pitch: list[float],
+    bass_pitch: list[dict[str, float | None]],
 ) -> ExportReport:
     output_dir.mkdir(parents=True, exist_ok=True)
     midi_output = output_dir / "midi"
