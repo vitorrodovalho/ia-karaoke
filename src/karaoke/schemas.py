@@ -8,7 +8,7 @@ class AnalysisReport(BaseModel):
     bpm: float
     beats: list[float]
     chords: list[dict[str, Any]]
-    bass_pitch: list[float]
+    bass_pitch: list[dict[str, Any]]
 
 
 class ExportReport(BaseModel):
